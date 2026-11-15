@@ -1,0 +1,4 @@
+download = '$HOME/Downloads/book.html'
+html = 'book.html'
+printer = '/usr/bin/chromium'
+llm_model = 'gemma4:26b-32k'
