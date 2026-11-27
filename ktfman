@@ -7,6 +7,8 @@ import tomllib
 import shutil
 from pathlib import Path
 import os
+import time
+
 
 with open('config.toml', 'rb') as fp:
     CONFIG = tomllib.load(fp)
@@ -19,7 +21,7 @@ PROMPT = f'''# この文章の日本語の誤字脱字を指摘してくださ�
 - 修正前、修正後のみを提示してください。
 - 修正する時の書式は下記の例の様にgit mergeの書式に従って下さい。
 - 「# 本文」以下のセクションが修正してほしい本文です。
-- 特に無いなら空白を返してください。
+- 特に修正が無いなら下記の例ではなく、空白を返してください。
 
 # 例
 <<<<<<<
@@ -31,8 +33,28 @@ PROMPT = f'''# この文章の日本語の誤字脱字を指摘してくださ�
 # 本文
 '''
 
-parser = argparse.ArgumentParser()
-parser.add_argument('command', choices=('print', 'check'))
+
+class MyHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    pass
+
+parser = argparse.ArgumentParser(
+    description='''将棋の本を書くためのプログラム。
+
+このサイトで楽に本を書くための補助です。
+https://shikenbisha.com/shogibookeditor/
+
+まず、config.tomlを適当に書きます。
+その上で例えばこうします。
+ktfman watch
+そして保存ボタンを押すとブラウザで印刷用のを表示してくれます。
+''',
+
+    formatter_class=MyHelpFormatter
+)
+parser.add_argument(
+    'command', choices=('print', 'check', 'watch'),
+    help='コマンド。print, check, watchの中からえらぶ。'
+)
 parser.add_argument('-n', '--num', type=int, default=0)
 args = parser.parse_args()
 
@@ -83,4 +105,8 @@ elif args.command == 'check':
         print('ページ数を-nオプションでいれてください。')
         exit()
     print(Command().check(args.num)) 
-
+elif args.command == 'watch':
+    while True:
+        time.sleep(1)
+        if os.path.exists(CONFIG['download']):
+            Command().print()
